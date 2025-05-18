@@ -1,18 +1,27 @@
-import { Model, DataTypes } from 'sequelize';
-import sequelize from '../config/database';
-import Product from './Product';
+import { Model, DataTypes, Optional } from 'sequelize';
+import sequelize from '../config/database.config';
 
 interface CategoryAttributes {
   id: number;
   name: string;
+  userId: number;
 }
 
-class Category extends Model<CategoryAttributes> implements CategoryAttributes {
+// Mark `id` as optional for creation
+interface CategoryCreationAttributes extends Optional<CategoryAttributes, 'id'> {}
+
+class Category extends Model<CategoryAttributes, CategoryCreationAttributes> implements CategoryAttributes {
   public id!: number;
   public name!: string;
+  public userId!: number;
 
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
+
+  // Override toJSON to return only dataValues
+  public toJSON(): CategoryAttributes {
+    return this.get({ plain: true });
+  }
 }
 
 Category.init(
@@ -27,13 +36,19 @@ Category.init(
       allowNull: false,
       unique: true,
     },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'Users', // This should match your User table name
+        key: 'id',
+      },
+    },
   },
   {
     sequelize,
     modelName: 'Category',
   }
 );
-
-Category.hasMany(Product, { foreignKey: 'categoryId' });
 
 export default Category;

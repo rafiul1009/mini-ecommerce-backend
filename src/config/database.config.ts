@@ -1,14 +1,15 @@
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
+import { DB_HOST, DB_NAME, DB_PASSWORD, DB_USER } from '.';
 
 dotenv.config();
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME || 'mini_ecommerce',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASSWORD || '',
+  DB_NAME,
+  DB_USER,
+  DB_PASSWORD,
   {
-    host: process.env.DB_HOST || 'localhost',
+    host: DB_HOST,
     dialect: 'mysql',
     logging: false,
     pool: {
