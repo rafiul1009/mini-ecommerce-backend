@@ -43,6 +43,15 @@ Order.init(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
       defaultValue: 0.00,
+      get() {
+        const value = this.getDataValue('total');
+    
+        if (typeof value === 'number') {
+          return value;
+        }
+    
+        return value ? parseFloat(value as string) : null;
+      }
     },
   },
   {

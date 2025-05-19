@@ -71,6 +71,15 @@ OrderItem.init(
     price: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+      get() {
+        const value = this.getDataValue('price');
+    
+        if (typeof value === 'number') {
+          return value;
+        }
+    
+        return value ? parseFloat(value as string) : null;
+      }
     },
     productName: {
       type: DataTypes.STRING,
@@ -83,6 +92,15 @@ OrderItem.init(
     productPrice: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+      get() {
+        const value = this.getDataValue('productPrice');
+    
+        if (typeof value === 'number') {
+          return value;
+        }
+    
+        return value ? parseFloat(value as string) : null;
+      }
     },
     categoryId: {
       type: DataTypes.INTEGER,

@@ -40,7 +40,7 @@ Category.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: 'Users', // This should match your User table name
+        model: 'Users',
         key: 'id',
       },
     },

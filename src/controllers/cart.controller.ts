@@ -2,6 +2,7 @@ import { Response } from 'express';
 import 'express-session';
 import Product from '../models/Product';
 import { AuthRequest } from '../middlewares/auth.middleware';
+import { getCartItems } from '../utils/cart.utils';
 
 declare module 'express-session' {
   interface Session {
@@ -38,9 +39,11 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
     
     if (quantity === 0) {
       delete req.session.cart[cartKey];
+      const cart = req.session?.cart || {};
+      const cartItems = await getCartItems(cart, userId);
       res.json({
         message: 'Item removed from cart',
-        data: req.session.cart
+        data: cartItems
       });
       return;
     }
@@ -54,14 +57,12 @@ export const addToCart = async (req: AuthRequest, res: Response) => {
     cartItem.quantity = quantity; // Set absolute quantity instead of adding
     req.session.cart[cartKey] = cartItem;
 
-    // Filter cart data to only return current user's items
-    const userCart = Object.entries(req.session.cart)
-      .filter(([key]) => key.startsWith(userId + "_"))
-      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+    const cart = req.session?.cart || {};
+    const cartItems = await getCartItems(cart, userId);
 
     res.json({
       message: 'Cart updated successfully',
-      data: userCart
+      data: cartItems
     });
   } catch (error) {
     console.error('Error updating cart:', error);

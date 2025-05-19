@@ -7,18 +7,24 @@ import Product from '../models/Product';
 import Category from '../models/Category';
 import { AuthRequest } from '../middlewares/auth.middleware';
 
+interface CartItem {
+  productId: number;
+  quantity: number;
+}
+
 export const checkout = async (req: AuthRequest, res: Response) => {
   const transaction: Transaction = await sequelize.transaction();
 
   try {
-    const { userId } = req.body;
-    if (!userId) {
-      res.status(400).json({ message: 'User ID is required' });
-      return;
-    }
+    const userId = req.user!.id;
 
     const cart = req.session.cart || {};
-    if (Object.keys(cart).length === 0) {
+    // Filter cart items for current user
+    const userCart = Object.entries(cart)
+      .filter(([key]) => key.startsWith(userId + "_"))
+      .reduce<Record<string, CartItem>>((acc, [_, value]) => ({ ...acc, [value.productId]: value }), {});
+
+    if (Object.keys(userCart).length === 0) {
       res.status(400).json({ message: 'Cart is empty' });
       return;
     }
@@ -31,7 +37,7 @@ export const checkout = async (req: AuthRequest, res: Response) => {
 
     let orderTotal = 0;
     // Create order items and check inventory
-    for (const [productId, item] of Object.entries(cart)) {
+    for (const [productId, item] of Object.entries(userCart) as [string, CartItem][]) {
       const product = await Product.findByPk(item.productId, { transaction });
       
       if (!product) {
@@ -49,7 +55,7 @@ export const checkout = async (req: AuthRequest, res: Response) => {
         orderId: order.id,
         productId: item.productId,
         quantity: item.quantity,
-        price: product.price,
+        price: itemTotal,
         productName: product.name,
         productDescription: product.description || '',
         productPrice: product.price,
@@ -64,12 +70,19 @@ export const checkout = async (req: AuthRequest, res: Response) => {
     // Commit transaction
     await transaction.commit();
 
-    // Clear the cart after successful checkout
-    req.session.cart = {};
+    // Only clear current user's cart items
+    const updatedCart = Object.entries(req.session.cart || {})
+      .filter(([key]) => !key.startsWith(userId + "_"))
+      .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+    
+    req.session.cart = updatedCart;
 
     // Fetch the completed order with items
     const completedOrder = await Order.findByPk(order.id, {
-      include: [{ model: OrderItem }]
+      include: [{ 
+        model: OrderItem,
+        as: 'orderItems' 
+      }]
     });
 
     res.status(201).json({

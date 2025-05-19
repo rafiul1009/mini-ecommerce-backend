@@ -13,9 +13,9 @@ export const getProducts = async (req: Request, res: Response) => {
       minRating,
       search,
       page = 1,
-      limit = 10,
     } = req.query;
 
+    const limit = 10;
     const whereClause: any = {};
 
     if (categoryId) {
