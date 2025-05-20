@@ -48,7 +48,7 @@ export const register: RequestHandler = async (req: Request, res: Response) => {
     // Set token as HTTP-only cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: NODE_ENV === 'production',
+      secure: true,
       sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
@@ -104,7 +104,7 @@ export const login: RequestHandler = async (req: Request, res: Response) => {
     // Set token as HTTP-only cookie
     res.cookie('token', token, {
       httpOnly: true,
-      secure: NODE_ENV === 'production',
+      secure: true,
       sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
@@ -123,7 +123,7 @@ export const logout: RequestHandler = (_req: Request, res: Response) => {
   try {
     res.clearCookie('token', {
       httpOnly: true,
-      secure: NODE_ENV === 'production',
+      secure: true,
       sameSite: 'none',
       maxAge: 0
     });
