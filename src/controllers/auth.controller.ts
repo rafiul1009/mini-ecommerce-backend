@@ -49,7 +49,7 @@ export const register: RequestHandler = async (req: Request, res: Response) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
@@ -105,7 +105,7 @@ export const login: RequestHandler = async (req: Request, res: Response) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
@@ -124,7 +124,7 @@ export const logout: RequestHandler = (_req: Request, res: Response) => {
     res.clearCookie('token', {
       httpOnly: true,
       secure: NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 0
     });
 
